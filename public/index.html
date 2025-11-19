@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recoil Duel - Online Multiplayer</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>⚔️ Recoil Duel ⚔️</h1>
+        <p class="subtitle">Online Multiplayer - First to 2 hits wins!</p>
+        
+        <div id="mainMenu" class="menu-screen">
+            <h2>Welcome!</h2>
+            <button class="btn" onclick="showCreateRoom()">Create Room</button>
+            <button class="btn btn-secondary" onclick="showJoinRoom()">Join Room</button>
+            <div id="connectionStatus" class="status-message hidden"></div>
+        </div>
+
+        <div id="createRoomScreen" class="menu-screen hidden">
+            <h2>Create Room</h2>
+            <div id="roomCodeDisplay" class="room-code-display hidden">
+                <p style="margin-bottom: 10px;">Your Room Code:</p>
+                <div class="code" id="roomCode">------</div>
+                <p class="waiting-message">Waiting for player 2 to join...</p>
+            </div>
+            <button class="btn" onclick="createRoom()">Generate Room Code</button>
+            <button class="btn btn-secondary" onclick="backToMenu()">Back</button>
+            <div id="createStatus" class="status-message hidden"></div>
+        </div>
+
+        <div id="joinRoomScreen" class="menu-screen hidden">
+            <h2>Join Room</h2>
+            <div class="input-group">
+                <label>Enter Room Code:</label>
+                <input type="text" id="roomCodeInput" maxlength="6" placeholder="ABC123">
+            </div>
+            <button class="btn" onclick="joinRoom()">Join Game</button>
+            <button class="btn btn-secondary" onclick="backToMenu()">Back</button>
+            <div id="joinStatus" class="error-message hidden"></div>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div class="scoreboard">
+                <div class="player-score player1">
+                    <div class="player-name">Player 1 (Cyan)</div>
+                    <div class="score" id="p1Score">0</div>
+                    <div class="hits" id="p1Hits">Hits: 0/2</div>
+                </div>
+                <div class="player-score player2">
+                    <div class="player-name">Player 2 (Orange)</div>
+                    <div class="score" id="p2Score">0</div>
+                    <div class="hits" id="p2Hits">Hits: 0/2</div>
+                </div>
+            </div>
+
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+            <div class="controls">
+                <h3>Controls</h3>
+                <p><span class="key-display">SPACE</span> - Shoot</p>
+                <p style="margin-top: 10px;"><span id="playerRole">You are Player 1</span></p>
+            </div>
+
+            <button class="btn btn-secondary" onclick="leaveGame()">Leave Game</button>
+        </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2 id="winnerText">Player 1 Wins!</h2>
+        <p>Congratulations! 🎉</p>
+        <div id="rematchStatus" class="status-message hidden" style="margin-bottom:15px;"></div>
+        <div style="display:flex;gap:12px;justify-content:center;">
+            <button class="btn" id="playAgainBtn" onclick="requestRematch()">Play Again</button>
+            <button class="btn btn-secondary" onclick="leaveGame()">Back to Menu</button>
+        </div>
+    </div>
+
+    <div id="countdown" class="countdown hidden"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
