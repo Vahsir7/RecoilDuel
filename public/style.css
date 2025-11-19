@@ -1,3 +1,4 @@
+/* public/style.css */
 :root {
     --color-background: #1f2121;
     --color-surface: #262828;
@@ -52,6 +53,7 @@ h1 {
     border: 3px solid var(--color-border);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     max-width: 500px;
+    width: 100%;
     margin: 0 auto;
 }
 
@@ -175,6 +177,13 @@ h1 {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     display: block;
     margin: 0 auto 20px;
+    
+    /* RESPONSIVE SETTINGS */
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    aspect-ratio: 800/600; /* Maintains the game's specific ratio */
+    touch-action: none;    /* Prevents browser zooming/scrolling while tapping */
 }
 
 .scoreboard {
@@ -263,6 +272,8 @@ h1 {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     text-align: center;
     z-index: 1000;
+    width: 90%;
+    max-width: 600px;
 }
 
 .game-over.show {
@@ -296,4 +307,43 @@ h1 {
     text-shadow: 0 0 20px rgba(50, 184, 198, 0.7);
     z-index: 1200;
     letter-spacing: 3px;
+}
+
+/* MOBILE ADJUSTMENTS */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .menu-screen {
+        padding: 20px;
+    }
+
+    .scoreboard {
+        gap: 10px;
+    }
+
+    .player-score {
+        padding: 10px;
+    }
+
+    .player-name {
+        font-size: 0.9rem;
+    }
+
+    .score {
+        font-size: 1.5rem;
+    }
+
+    .game-over {
+        padding: 30px 20px;
+    }
+    
+    .game-over h2 {
+        font-size: 2rem;
+    }
 }

@@ -1,3 +1,4 @@
+// public/script.js
 const socket = io();
 
 let myPlayerId = null;
@@ -246,6 +247,7 @@ socket.on('hitRegistered', (data) => {
 });
 
 socket.on('gameEnded', (data) => {
+    // Fix: prevent infinite loop by passing flag
     endGame(data.winnerId === myPlayerId ? localPlayer : opponentPlayer, true);
 });
 
@@ -440,18 +442,7 @@ function startGame() {
     opponentPlayer.vx = Math.cos(angle2) * speed2;
     opponentPlayer.vy = Math.sin(angle2) * speed2;
     opponentPlayer.angle = Math.random() * Math.PI * 2;
-
-    localPlayer.score = playerScores[localPlayer.id] || 0;
-    opponentPlayer.score = playerScores[opponentPlayer.id] || 0;
-    localPlayer.hits = 0;
-    opponentPlayer.hits = 0;
-    localPlayer.bullets = [];
-    opponentPlayer.bullets = [];
-    localPlayer.hasShot = false;
-    opponentPlayer.hasShot = false;
-    localPlayer.canShoot = true;
-    opponentPlayer.canShoot = true;
-
+    // ... (continuation of startGame function)
     game.running = false;
     updateScoreboard();
 
@@ -475,12 +466,32 @@ function leaveGame() {
     playerScores[2] = 0;
 }
 
+// --- INPUT HANDLING (Keyboard + Touch) ---
+
+// Keyboard: Spacebar to shoot
 document.addEventListener('keydown', (e) => {
     if (e.key === ' ' && localPlayer && game.running) {
         e.preventDefault();
         localPlayer.shoot();
     }
 });
+
+// Mobile/Mouse: Tap or Click canvas to shoot
+function handleTap(e) {
+    if (localPlayer && game.running) {
+        // Prevent default browser zooming/scrolling behavior on taps
+        if (e.type === 'touchstart') {
+            e.preventDefault();
+        }
+        localPlayer.shoot();
+    }
+}
+
+// Add listeners to the canvas
+canvas.addEventListener('touchstart', handleTap, { passive: false });
+canvas.addEventListener('mousedown', handleTap);
+
+// -----------------------------------------
 
 function checkCollisions() {
     if (!localPlayer || !opponentPlayer) return;
@@ -574,7 +585,8 @@ function updateScoreboard() {
     }
 }
 
-function endGame(winner) {
+// UPDATED: endGame function with Replay Loop Fix
+function endGame(winner, fromServer = false) {
     game.running = false;
     const isLocalWinner = winner === localPlayer;
     document.getElementById('winnerText').textContent = isLocalWinner ? 'You Win!' : 'You Lose!';
@@ -582,14 +594,14 @@ function endGame(winner) {
     resetRematchUI();
     updateRematchStatus('Press Play Again for a rematch vote.');
     
-    if (isLocalWinner) {
+    // Only emit if we are the winner and this call didn't come from the server
+    if (isLocalWinner && !fromServer) {
         socket.emit('gameOver', { winnerId: myPlayerId });
     }
 }
 
 function requestRematch() {
     if (!currentRoomCode) {
-        // no room to rematch in — just go back to menu
         leaveGame();
         return;
     }
@@ -606,6 +618,7 @@ function requestRematch() {
 }
 
 function gameLoop() {
+    // Fill background
     ctx.fillStyle = '#262828';
     ctx.fillRect(0, 0, game.width, game.height);
 
@@ -621,22 +634,6 @@ function gameLoop() {
     }
 
     requestAnimationFrame(gameLoop);
-}
-
-function endGame(winner, fromServer = false) {
-    game.running = false;
-    const isLocalWinner = winner === localPlayer;
-    document.getElementById('winnerText').textContent = isLocalWinner ? 'You Win!' : 'You Lose!';
-    document.getElementById('gameOver').classList.add('show');
-    resetRematchUI();
-    updateRematchStatus('Press Play Again for a rematch vote.');
-    
-    // Only emit gameOver if:
-    // 1. We are the winner (so only one client sends it)
-    // 2. AND this call did NOT come from the server (stops the loop)
-    if (isLocalWinner && !fromServer) {
-        socket.emit('gameOver', { winnerId: myPlayerId });
-    }
 }
 
 gameLoop();
